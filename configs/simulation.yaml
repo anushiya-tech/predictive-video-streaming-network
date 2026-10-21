@@ -1,0 +1,7 @@
+# Chunk-level simulator defaults.
+seed: 42
+tick_seconds: 1
+startup_buffer_seconds: 4.0
+max_buffer_seconds: 30.0
+segment_duration_seconds: 4.0
+

@@ -1,0 +1,6 @@
+# Features use observations at or before prediction time.
+seed: 42
+window_seconds: [1, 3, 5, 10]
+minimum_history_seconds: 10
+stability_epsilon: 0.001
+

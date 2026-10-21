@@ -1,0 +1,11 @@
+method,environment,rebuffer_seconds,avg_bitrate_mbps,switches,qoe
+Fixed 1080p,Synthetic (6 Scenarios),33.136,5.0,0.0,-137.487
+Rule-based,Synthetic (6 Scenarios),0.0,4.462,2.8,4.462
+Throughput,Synthetic (6 Scenarios),0.0,4.156,3.7,4.156
+Buffer-based,Synthetic (6 Scenarios),0.196,4.526,5.7,3.681
+Proposed,Synthetic (6 Scenarios),0.687,3.778,3.7,0.824
+Fixed 1080p,Real (88 Validation Traces),5770.399,5.0,0.0,-24807.715
+Rule-based,Real (88 Validation Traces),347.028,0.812,1.8,-1491.408
+Throughput,Real (88 Validation Traces),347.028,0.811,4.3,-1491.408
+Buffer-based,Real (88 Validation Traces),582.885,1.21,77.4,-2505.196
+Proposed,Real (88 Validation Traces),346.95,0.8,0.0,-1491.084

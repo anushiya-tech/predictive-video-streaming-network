@@ -1,0 +1,147 @@
+{
+  "validation_samples": 16254,
+  "validation_distribution": {
+    "High": 7301,
+    "Low": 5196,
+    "Medium": 3757
+  },
+  "classes": [
+    "High",
+    "Low",
+    "Medium"
+  ],
+  "baselines": {
+    "majority": {
+      "name": "Majority Baseline",
+      "accuracy": 0.4491817398794143,
+      "macro_f1": 0.20663694898464588,
+      "precision": 0.14972724662647144,
+      "recall": 0.3333333333333333,
+      "per_class": {
+        "High": {
+          "precision": 0.4491817398794143,
+          "recall": 1.0,
+          "f1-score": 0.6199108469539376,
+          "support": 7301
+        },
+        "Low": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 5196
+        },
+        "Medium": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 3757
+        }
+      },
+      "confusion_matrix": [
+        [
+          7301,
+          0,
+          0
+        ],
+        [
+          5196,
+          0,
+          0
+        ],
+        [
+          3757,
+          0,
+          0
+        ]
+      ]
+    },
+    "current_buffer_heuristic": {
+      "name": "Current-Buffer-Only Heuristic",
+      "accuracy": 0.540420819490587,
+      "macro_f1": 0.49019761029014225,
+      "precision": 0.42985291064850406,
+      "recall": 0.6516724336793541,
+      "per_class": {
+        "High": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1-score": 0.0,
+          "support": 7301
+        },
+        "Low": {
+          "precision": 0.9583179638509775,
+          "recall": 1.0,
+          "f1-score": 0.9787153889621397,
+          "support": 5196
+        },
+        "Medium": {
+          "precision": 0.33124076809453473,
+          "recall": 0.9550173010380623,
+          "f1-score": 0.4918774419082871,
+          "support": 3757
+        }
+      },
+      "confusion_matrix": [
+        [
+          0,
+          57,
+          7244
+        ],
+        [
+          0,
+          5196,
+          0
+        ],
+        [
+          0,
+          169,
+          3588
+        ]
+      ]
+    },
+    "production_random_forest": {
+      "name": "Production Model (Random Forest)",
+      "accuracy": 0.9062999876953365,
+      "macro_f1": 0.8939677779439812,
+      "precision": 0.8988383603302368,
+      "recall": 0.890547907148752,
+      "per_class": {
+        "High": {
+          "precision": 0.8954945347907225,
+          "recall": 0.9201479249417888,
+          "f1-score": 0.9076538539485239,
+          "support": 7301
+        },
+        "Low": {
+          "precision": 0.9689080352125866,
+          "recall": 0.9955735180908392,
+          "f1-score": 0.9820598006644519,
+          "support": 5196
+        },
+        "Medium": {
+          "precision": 0.8321125109874011,
+          "recall": 0.7559222784136279,
+          "f1-score": 0.7921896792189679,
+          "support": 3757
+        }
+      },
+      "confusion_matrix": [
+        [
+          6718,
+          32,
+          551
+        ],
+        [
+          1,
+          5173,
+          22
+        ],
+        [
+          783,
+          134,
+          2840
+        ]
+      ]
+    }
+  }
+}

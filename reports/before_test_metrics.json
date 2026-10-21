@@ -1,0 +1,5 @@
+{
+  "network_condition": {"accuracy": 0.4527963671128107, "macro_f1": 0.3901144454541477},
+  "buffer_risk": {"accuracy": 0.9103728489483748, "macro_f1": 0.8959910982020339},
+  "recommended_quality": {"accuracy": 0.9587715105162524, "macro_f1": 0.6845448505393991}
+}

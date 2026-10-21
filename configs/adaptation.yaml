@@ -1,0 +1,9 @@
+# Predictive ABR controller safeguards.
+seed: 42
+risk_confidence_threshold: 0.70
+trend_confidence_threshold: 0.70
+minimum_dwell_seconds: 8
+cooldown_seconds: 6
+up_switch_evidence_count: 3
+critical_buffer_seconds: 1.5
+

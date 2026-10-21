@@ -1,0 +1,1364 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Predictive Video Streaming Network — ABR Dashboard</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: rgba(18, 24, 38, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --card-hover: rgba(255, 255, 255, 0.12);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-glow: rgba(56, 189, 248, 0.25);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #a855f7;
+      --radius: 12px;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.5;
+      padding: 1.5rem;
+      min-height: 100vh;
+      background-image:
+        radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(168, 85, 247, 0.06) 0px, transparent 50%);
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--card-border);
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .title-group h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .title-group h1 .badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+
+    .title-group p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    .system-status {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--card-bg);
+      padding: 0.4rem 0.8rem;
+      border-radius: 9999px;
+      border: 1px solid var(--card-border);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px var(--success);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
+    }
+
+    /* Control Strip */
+    .control-strip {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      backdrop-filter: blur(12px);
+    }
+
+    .scenario-buttons {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text);
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.825rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--card-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn.active {
+      background: var(--primary);
+      color: #041226;
+      border-color: var(--primary);
+      font-weight: 600;
+      box-shadow: 0 0 12px var(--primary-glow);
+    }
+
+    .btn-action {
+      background: #0284c7;
+      color: white;
+      border-color: #38bdf8;
+    }
+
+    .btn-action:hover {
+      background: #0369a1;
+    }
+
+    .playback-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+
+    .timeline-scrubber {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-grow: 1;
+      max-width: 320px;
+    }
+
+    .timeline-scrubber input[type=range] {
+      flex-grow: 1;
+      accent-color: var(--primary);
+      cursor: pointer;
+    }
+
+    .tick-display {
+      font-variant-numeric: tabular-nums;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      min-width: 55px;
+    }
+
+    /* Grid Layout */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 1080px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      backdrop-filter: blur(12px);
+      position: relative;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .card-title {
+      font-size: 0.925rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Video Player Canvas */
+    .player-container {
+      position: relative;
+      width: 100%;
+      height: 220px;
+      background: #040812;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    #videoCanvas {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .player-overlay {
+      position: absolute;
+      top: 0.75rem;
+      left: 0.75rem;
+      right: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+
+    .res-badge {
+      background: rgba(0, 0, 0, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .player-status-badge {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid var(--success);
+      color: var(--success);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .stall-warning {
+      position: absolute;
+      bottom: 0.75rem;
+      left: 0.75rem;
+      right: 0.75rem;
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      animation: flash 1s infinite alternate;
+    }
+
+    @keyframes flash {
+      from {
+        opacity: 0.85;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .spinner {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Bitrate Ladder */
+    .bitrate-ladder {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .ladder-rung {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.6rem 0.5rem;
+      text-align: center;
+      transition: all 0.25s ease;
+    }
+
+    .ladder-rung .tier-name {
+      font-size: 0.825rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .ladder-rung .tier-bitrate {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .ladder-rung.active {
+      background: rgba(56, 189, 248, 0.15);
+      border-color: var(--primary);
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .ladder-rung.active .tier-name {
+      color: var(--primary);
+    }
+
+    .ladder-rung.active .tier-bitrate {
+      color: #bae6fd;
+      font-weight: 600;
+    }
+
+    /* Prediction Panels */
+    .prediction-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .pred-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.85rem;
+    }
+
+    .pred-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .pred-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .pred-confidence {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .conf-meter {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      margin-top: 0.25rem;
+      overflow: hidden;
+    }
+
+    .conf-fill {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+
+    /* Decision Panel */
+    .decision-strip {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .decision-badge {
+      padding: 0.3rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.825rem;
+      font-weight: 600;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.4);
+      color: #d8b4fe;
+    }
+
+    /* QoE Stat Cards */
+    .qoe-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .qoe-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      text-align: center;
+    }
+
+    .qoe-label {
+      font-size: 0.725rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .qoe-val {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-top: 0.2rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Charts */
+    .chart-container {
+      width: 100%;
+      height: 160px;
+      position: relative;
+      margin-bottom: 1.25rem;
+    }
+
+    .chart-container:last-child {
+      margin-bottom: 0;
+    }
+
+    canvas.telemetry-chart {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Baseline Hub */
+    .baselines-card {
+      margin-top: 1.5rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table.baseline-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.825rem;
+      text-align: left;
+    }
+
+    table.baseline-table th {
+      padding: 0.65rem 0.75rem;
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    table.baseline-table td {
+      padding: 0.65rem 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-variant-numeric: tabular-nums;
+    }
+
+    table.baseline-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    table.baseline-table tr.highlight td {
+      background: rgba(56, 189, 248, 0.08);
+      font-weight: 600;
+      color: #e0f2fe;
+    }
+
+    .env-toggle {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    /* Colors */
+    .c-green {
+      color: var(--success);
+    }
+
+    .c-amber {
+      color: var(--warning);
+    }
+
+    .c-red {
+      color: var(--danger);
+    }
+
+    .c-blue {
+      color: var(--primary);
+    }
+
+    .c-purple {
+      color: var(--purple);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="title-group">
+      <h1>
+        Predictive Video Streaming Network
+        <span class="badge">Trace-Driven ABR</span>
+      </h1>
+      <p>Autonomous Adaptive Bitrate streaming powered by 3-Class HistGradientBoosting &amp; Random Forest risk
+        anticipation</p>
+    </div>
+    <div class="system-status">
+      <span class="status-dot"></span>
+      <span>Simulated Engine Online &bull; Seed 42</span>
+    </div>
+  </header>
+
+  <!-- Control Strip -->
+  <section class="control-strip" aria-label="Simulation Controls">
+    <div class="scenario-buttons" id="scenarioButtons">
+      <span
+        style="font-size: 0.8rem; color: var(--text-muted); align-self: center; margin-right: 0.4rem;">Scenario:</span>
+      <button class="btn active" onclick="loadScenario('sudden_drop', this)">Sudden Drop</button>
+      <button class="btn" onclick="loadScenario('degradation', this)">Degradation</button>
+      <button class="btn" onclick="loadScenario('recovery', this)">Recovery</button>
+      <button class="btn" onclick="loadScenario('stable', this)">Stable</button>
+      <button class="btn" onclick="loadScenario('congestion', this)">Congestion</button>
+      <button class="btn" onclick="loadScenario('mobile', this)">Mobile</button>
+    </div>
+
+    <div class="playback-controls">
+      <button class="btn btn-action" id="playBtn" onclick="togglePlay()">Pause</button>
+      <button class="btn" onclick="stepForward()">Step &gt;</button>
+      <button class="btn" onclick="resetPlayback()">Reset</button>
+
+      <div class="timeline-scrubber">
+        <input type="range" id="tickSlider" min="0" max="59" value="0" oninput="onScrub(this.value)">
+        <span class="tick-display" id="tickDisplay">0 / 60s</span>
+      </div>
+
+      <div style="display: flex; gap: 0.2rem;">
+        <button class="btn" id="speed1x" onclick="setSpeed(1, this)">1x</button>
+        <button class="btn active" id="speed2x" onclick="setSpeed(2, this)">2x</button>
+        <button class="btn" id="speedMax" onclick="setSpeed(10, this)">Max</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Grid -->
+  <main class="dashboard-grid">
+    <!-- Left Column: Video Player & Adaptation Logic -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+      <!-- Video Player Representation -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+              <path
+                d="M0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1zm4 10.5v-7a.5.5 0 0 1 .757-.429l6 3.5a.5.5 0 0 1 0 .858l-6 3.5A.5.5 0 0 1 4 11.5z" />
+            </svg>
+            Adaptive Video Stream
+          </span>
+          <span class="card-subtitle" id="streamFps">60 FPS &bull; 4s Segments</span>
+        </div>
+
+        <div class="player-container">
+          <canvas id="videoCanvas"></canvas>
+          <div class="player-overlay">
+            <span class="res-badge" id="playerResBadge">1080p HD</span>
+            <span class="player-status-badge" id="playerStateBadge">PLAYING</span>
+          </div>
+          <div class="spinner" id="bufferingSpinner"></div>
+          <div class="stall-warning" id="stallWarning">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+              <path
+                d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z" />
+              <path
+                d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995z" />
+            </svg>
+            <span id="stallWarningText">STALL HAZARD: High Buffer Drain Projected</span>
+          </div>
+        </div>
+
+        <!-- Bitrate Ladder Representation -->
+        <div class="bitrate-ladder">
+          <div class="ladder-rung" id="rung-360p">
+            <div class="tier-name">360p</div>
+            <div class="tier-bitrate">0.8 Mbps</div>
+          </div>
+          <div class="ladder-rung" id="rung-480p">
+            <div class="tier-name">480p</div>
+            <div class="tier-bitrate">1.4 Mbps</div>
+          </div>
+          <div class="ladder-rung" id="rung-720p">
+            <div class="tier-name">720p</div>
+            <div class="tier-bitrate">2.8 Mbps</div>
+          </div>
+          <div class="ladder-rung active" id="rung-1080p">
+            <div class="tier-name">1080p</div>
+            <div class="tier-bitrate">5.0 Mbps</div>
+          </div>
+        </div>
+
+        <!-- ML Predictions Center -->
+        <div class="prediction-grid">
+          <div class="pred-card">
+            <div class="pred-header">
+              <span>NETWORK TREND (5s)</span>
+              <span id="trendHorizon">HistGB</span>
+            </div>
+            <div class="pred-value" id="trendValue">
+              <span class="c-blue">Stable</span>
+            </div>
+            <div class="pred-confidence">
+              <span>Confidence</span>
+              <span id="trendConfText">85.0%</span>
+            </div>
+            <div class="conf-meter">
+              <div class="conf-fill" id="trendConfFill" style="width: 85%;"></div>
+            </div>
+          </div>
+
+          <div class="pred-card">
+            <div class="pred-header">
+              <span>BUFFER RISK (5s)</span>
+              <span id="riskHorizon">RandForest</span>
+            </div>
+            <div class="pred-value" id="riskValue">
+              <span class="c-green">Low</span>
+            </div>
+            <div class="pred-confidence">
+              <span>Confidence</span>
+              <span id="riskConfText">95.0%</span>
+            </div>
+            <div class="conf-meter">
+              <div class="conf-fill" id="riskConfFill" style="width: 95%; background: var(--success);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Decision Strip -->
+        <div class="decision-strip">
+          <div>
+            <div style="font-size: 0.725rem; color: var(--text-muted); text-transform: uppercase;">ABR Action &amp;
+              Reason</div>
+            <div style="font-size: 0.95rem; font-weight: 600; margin-top: 0.15rem;" id="decisionActionText">Hold 1080p
+              (5.0 Mbps)</div>
+          </div>
+          <span class="decision-badge" id="decisionReasonBadge">hold</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Right Column: Live Telemetry & QoE -->
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+      <!-- QoE Scorecard -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Real-Time Session QoE</span>
+          <span class="card-subtitle">P.1203 Formula: R - 4.3&times;Stall</span>
+        </div>
+        <div class="qoe-stats">
+          <div class="qoe-card">
+            <div class="qoe-label">Avg Bitrate</div>
+            <div class="qoe-val c-blue" id="qoeBitrate">0.00 <span
+                style="font-size: 0.75rem; color: var(--text-muted);">Mbps</span></div>
+          </div>
+          <div class="qoe-card">
+            <div class="qoe-label">Rebuffering</div>
+            <div class="qoe-val c-green" id="qoeStall">0.00 <span
+                style="font-size: 0.75rem; color: var(--text-muted);">s</span></div>
+          </div>
+          <div class="qoe-card">
+            <div class="qoe-label">Switches</div>
+            <div class="qoe-val c-amber" id="qoeSwitches">0</div>
+          </div>
+          <div class="qoe-card">
+            <div class="qoe-label">QoE Score</div>
+            <div class="qoe-val c-purple" id="qoeScore">0.00</div>
+          </div>
+        </div>
+
+        <!-- Telemetry Charts -->
+        <div
+          style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.4rem; display: flex; justify-content: space-between;">
+          <span>THROUGHPUT &amp; VIDEO BITRATE (Mbps)</span>
+          <span style="font-weight: 400; font-size: 0.75rem;">
+            <span style="color: var(--primary);">&bull; Bandwidth</span> &nbsp;
+            <span style="color: var(--warning);">&bull; Bitrate</span>
+          </span>
+        </div>
+        <div class="chart-container">
+          <canvas class="telemetry-chart" id="bandwidthChart"></canvas>
+        </div>
+
+        <div
+          style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-top: 1rem; margin-bottom: 0.4rem; display: flex; justify-content: space-between;">
+          <span>BUFFER OCCUPANCY (Seconds)</span>
+          <span style="font-weight: 400; font-size: 0.75rem;">
+            <span style="color: var(--danger);">&bull; &lt;3s Risk</span> &nbsp;
+            <span style="color: var(--warning);">&bull; &lt;8s Warn</span> &nbsp;
+            <span style="color: var(--success);">&bull; Buffer</span>
+          </span>
+        </div>
+        <div class="chart-container">
+          <canvas class="telemetry-chart" id="bufferChart"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Baseline Benchmark Hub -->
+  <section class="card baselines-card">
+    <div class="card-header">
+      <div>
+        <span class="card-title">Comparative ABR Benchmarks</span>
+        <span class="card-subtitle">Validated performance against standard algorithms under identical network
+          traces</span>
+      </div>
+      <div class="env-toggle">
+        <button class="btn active" id="btnSynEnv" onclick="toggleEnv('Synthetic', this)">Synthetic (6
+          Scenarios)</button>
+        <button class="btn" id="btnRealEnv" onclick="toggleEnv('Real', this)">Real Mobile (88 Traces)</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="baseline-table">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Environment</th>
+            <th>Avg Rebuffering</th>
+            <th>Delivered Bitrate</th>
+            <th>Quality Switches</th>
+            <th>QoE Score</th>
+            <th>Relative Performance</th>
+          </tr>
+        </thead>
+        <tbody id="baselineTableBody">
+          <tr>
+            <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">Loading baselines
+              from /api/baselines...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <script>
+    // State management
+    let historyData = [];
+    let currentTick = 0;
+    let isPlaying = false;
+    let playbackInterval = null;
+    let playbackSpeed = 2; // 2x default (200ms per tick)
+    let baselineData = [];
+    let currentEnv = 'Synthetic';
+
+    // Ladder configuration
+    const LADDER = [
+      { quality: "360p", bitrate: 0.8 },
+      { quality: "480p", bitrate: 1.4 },
+      { quality: "720p", bitrate: 2.8 },
+      { quality: "1080p", bitrate: 5.0 }
+    ];
+
+    // Canvas charts setup
+    const bwCanvas = document.getElementById('bandwidthChart');
+    const bwCtx = bwCanvas.getContext('2d');
+    const bufCanvas = document.getElementById('bufferChart');
+    const bufCtx = bufCanvas.getContext('2d');
+    const videoCanvas = document.getElementById('videoCanvas');
+    const videoCtx = videoCanvas.getContext('2d');
+
+    function resizeCanvases() {
+      [bwCanvas, bufCanvas].forEach(c => {
+        const rect = c.parentElement.getBoundingClientRect();
+        c.width = rect.width * window.devicePixelRatio;
+        c.height = rect.height * window.devicePixelRatio;
+      });
+      const vRect = videoCanvas.parentElement.getBoundingClientRect();
+      videoCanvas.width = vRect.width * window.devicePixelRatio;
+      videoCanvas.height = vRect.height * window.devicePixelRatio;
+    }
+    window.addEventListener('resize', () => { resizeCanvases(); render(); });
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', async () => {
+      resizeCanvases();
+      await fetchBaselines();
+      await loadScenario('sudden_drop');
+    });
+
+    async function loadScenario(scenarioName, btnElement) {
+      if (btnElement) {
+        document.querySelectorAll('#scenarioButtons .btn').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+      }
+      pause();
+      try {
+        const res = await fetch('/api/simulation/scenario', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ scenario: scenarioName })
+        });
+        if (!res.ok) throw new Error('Failed to run scenario');
+        const histRes = await fetch('/api/network/history');
+        historyData = await histRes.json();
+        currentTick = 0;
+        document.getElementById('tickSlider').max = Math.max(0, historyData.length - 1);
+        render();
+        play();
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function play() {
+      if (isPlaying) return;
+      isPlaying = true;
+      document.getElementById('playBtn').textContent = 'Pause';
+      document.getElementById('playBtn').classList.add('btn-action');
+      const delay = Math.max(20, Math.floor(400 / playbackSpeed));
+      playbackInterval = setInterval(() => {
+        if (currentTick < historyData.length - 1) {
+          currentTick++;
+          render();
+        } else {
+          pause();
+        }
+      }, delay);
+    }
+
+    function pause() {
+      isPlaying = false;
+      clearInterval(playbackInterval);
+      document.getElementById('playBtn').textContent = 'Play';
+      document.getElementById('playBtn').classList.remove('btn-action');
+    }
+
+    function togglePlay() {
+      if (isPlaying) pause(); else play();
+    }
+
+    function stepForward() {
+      pause();
+      if (currentTick < historyData.length - 1) {
+        currentTick++;
+        render();
+      }
+    }
+
+    function resetPlayback() {
+      pause();
+      currentTick = 0;
+      render();
+    }
+
+    function onScrub(val) {
+      pause();
+      currentTick = parseInt(val, 10);
+      render();
+    }
+
+    function setSpeed(spd, btn) {
+      playbackSpeed = spd;
+      document.querySelectorAll('.playback-controls .btn').forEach(b => {
+        if (b.id && b.id.startsWith('speed')) b.classList.remove('active');
+      });
+      if (btn) btn.classList.add('active');
+      if (isPlaying) { pause(); play(); }
+    }
+
+    // Render loop
+    function render() {
+      if (!historyData || historyData.length === 0) return;
+      const data = historyData[currentTick];
+      if (!data) return;
+
+      // Update controls
+      document.getElementById('tickSlider').value = currentTick;
+      document.getElementById('tickDisplay').textContent = `${currentTick + 1} / ${historyData.length}s`;
+
+      // Update Rungs
+      const qual = data.quality || "720p";
+      LADDER.forEach(rung => {
+        const el = document.getElementById(`rung-${rung.quality}`);
+        if (el) {
+          if (rung.quality === qual) el.classList.add('active');
+          else el.classList.remove('active');
+        }
+      });
+
+      // Update Player Overlay
+      document.getElementById('playerResBadge').textContent = `${qual} HD`;
+      const isStall = data.stall_s > 0;
+      const spinner = document.getElementById('bufferingSpinner');
+      const stateBadge = document.getElementById('playerStateBadge');
+      const stallWarn = document.getElementById('stallWarning');
+
+      if (isStall) {
+        spinner.style.display = 'block';
+        stateBadge.textContent = 'BUFFERING';
+        stateBadge.style.borderColor = 'var(--danger)';
+        stateBadge.style.color = 'var(--danger)';
+        stateBadge.style.background = 'rgba(239, 68, 68, 0.2)';
+      } else {
+        spinner.style.display = 'none';
+        stateBadge.textContent = 'PLAYING';
+        stateBadge.style.borderColor = 'var(--success)';
+        stateBadge.style.color = 'var(--success)';
+        stateBadge.style.background = 'rgba(16, 185, 129, 0.2)';
+      }
+
+      // Stall / Hazard Warning
+      const predRisk = data.prediction?.buffer_risk || "Low";
+      if (data.buffer_s < 3.0 || predRisk === "High") {
+        stallWarn.style.display = 'flex';
+        document.getElementById('stallWarningText').textContent = data.buffer_s < 3.0
+          ? `CRITICAL: Buffer depleted (${data.buffer_s.toFixed(1)}s) &bull; Fallback active`
+          : `STALL HAZARD: High Buffer Drain Anticipated in next 5s`;
+      } else {
+        stallWarn.style.display = 'none';
+      }
+
+      // Predictions
+      const predTrend = data.prediction?.network_condition || "Stable";
+      const trendConf = (data.prediction?.network_confidence || 0.8) * 100;
+      const trendEl = document.getElementById('trendValue');
+      trendEl.textContent = predTrend;
+      trendEl.className = 'pred-value ' + (predTrend === 'Improving' ? 'c-blue' : (predTrend === 'Degrading' ? 'c-red' : 'c-green'));
+      document.getElementById('trendConfText').textContent = trendConf.toFixed(1) + '%';
+      document.getElementById('trendConfFill').style.width = trendConf + '%';
+
+      const riskConf = (data.prediction?.buffer_confidence || 0.9) * 100;
+      const riskEl = document.getElementById('riskValue');
+      riskEl.textContent = predRisk;
+      riskEl.className = 'pred-value ' + (predRisk === 'High' ? 'c-red' : (predRisk === 'Medium' ? 'c-amber' : 'c-green'));
+      document.getElementById('riskConfText').textContent = riskConf.toFixed(1) + '%';
+      const riskFill = document.getElementById('riskConfFill');
+      riskFill.style.width = riskConf + '%';
+      riskFill.style.background = predRisk === 'High' ? 'var(--danger)' : (predRisk === 'Medium' ? 'var(--warning)' : 'var(--success)');
+
+      // Decision
+      const dec = data.decision || {};
+      document.getElementById('decisionActionText').textContent = `${dec.quality || qual} (${(dec.bitrate_mbps || 0).toFixed(1)} Mbps)`;
+      const reasonBadge = document.getElementById('decisionReasonBadge');
+      reasonBadge.textContent = dec.reason || 'hold';
+      if (dec.reason === 'predicted_high_risk') {
+        reasonBadge.style.color = '#fca5a5';
+        reasonBadge.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        reasonBadge.style.background = 'rgba(239, 68, 68, 0.15)';
+      } else if (dec.reason === 'evidence_based_up_switch') {
+        reasonBadge.style.color = '#7dd3fc';
+        reasonBadge.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+        reasonBadge.style.background = 'rgba(56, 189, 248, 0.15)';
+      } else {
+        reasonBadge.style.color = '#d8b4fe';
+        reasonBadge.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+        reasonBadge.style.background = 'rgba(168, 85, 247, 0.15)';
+      }
+
+      // Compute Session QoE up to current tick
+      let sumBitrate = 0;
+      let sumStalls = 0;
+      let switchCount = 0;
+      let lastR = null;
+      for (let i = 0; i <= currentTick; i++) {
+        const item = historyData[i];
+        const r = item.decision?.bitrate_mbps || item.bitrate_mbps || 0.8;
+        sumBitrate += r;
+        sumStalls += (item.stall_s || 0);
+        if (lastR !== null && r !== lastR) switchCount++;
+        lastR = r;
+      }
+      const avgBw = sumBitrate / (currentTick + 1);
+      const qoeScore = avgBw - 4.3 * sumStalls;
+
+      document.getElementById('qoeBitrate').innerHTML = `${avgBw.toFixed(2)} <span style="font-size: 0.75rem; color: var(--text-muted);">Mbps</span>`;
+      document.getElementById('qoeStall').innerHTML = `${sumStalls.toFixed(2)} <span style="font-size: 0.75rem; color: var(--text-muted);">s</span>`;
+      document.getElementById('qoeStall').className = 'qoe-val ' + (sumStalls > 0 ? 'c-red' : 'c-green');
+      document.getElementById('qoeSwitches').textContent = switchCount;
+      document.getElementById('qoeScore').textContent = qoeScore.toFixed(2);
+      document.getElementById('qoeScore').className = 'qoe-val ' + (qoeScore < 0 ? 'c-red' : 'c-purple');
+
+      // Draw Charts & Video canvas
+      drawBandwidthChart();
+      drawBufferChart();
+      drawSimulatedVideo(qual, isStall);
+    }
+
+    // Chart: Bandwidth vs Bitrate
+    function drawBandwidthChart() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = bwCanvas.width / dpr;
+      const h = bwCanvas.height / dpr;
+      bwCtx.save();
+      bwCtx.scale(dpr, dpr);
+      bwCtx.clearRect(0, 0, w, h);
+
+      const maxTicks = historyData.length;
+      if (maxTicks <= 1) { bwCtx.restore(); return; }
+
+      // Compute max scale
+      let maxVal = 10.0;
+      historyData.forEach(d => {
+        if (d.bandwidth_mbps > maxVal) maxVal = d.bandwidth_mbps;
+      });
+      maxVal = Math.ceil(maxVal * 1.15);
+
+      const padX = 35;
+      const padY = 20;
+      const plotW = w - padX - 10;
+      const plotH = h - padY - 20;
+
+      // Draw horizontal grid
+      bwCtx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+      bwCtx.lineWidth = 1;
+      bwCtx.fillStyle = '#64748b';
+      bwCtx.font = '10px sans-serif';
+      bwCtx.textAlign = 'right';
+
+      for (let step = 0; step <= 4; step++) {
+        const val = (maxVal * step) / 4;
+        const y = padY + plotH - (plotH * step) / 4;
+        bwCtx.beginPath();
+        bwCtx.moveTo(padX, y);
+        bwCtx.lineTo(padX + plotW, y);
+        bwCtx.stroke();
+        bwCtx.fillText(val.toFixed(0), padX - 6, y + 3);
+      }
+
+      // Draw Bandwidth Line with Gradient
+      bwCtx.beginPath();
+      historyData.forEach((d, i) => {
+        const x = padX + (plotW * i) / (maxTicks - 1);
+        const y = padY + plotH - (plotH * d.bandwidth_mbps) / maxVal;
+        if (i === 0) bwCtx.moveTo(x, y); else bwCtx.lineTo(x, y);
+      });
+      bwCtx.strokeStyle = '#38bdf8';
+      bwCtx.lineWidth = 2;
+      bwCtx.stroke();
+
+      // Bandwidth area fill up to currentTick
+      const currX = padX + (plotW * currentTick) / (maxTicks - 1);
+      bwCtx.save();
+      bwCtx.beginPath();
+      bwCtx.rect(padX, padY, currX - padX, plotH);
+      bwCtx.clip();
+      const grad = bwCtx.createLinearGradient(0, padY, 0, padY + plotH);
+      grad.addColorStop(0, 'rgba(56, 189, 248, 0.25)');
+      grad.addColorStop(1, 'rgba(56, 189, 248, 0.0)');
+      bwCtx.fillStyle = grad;
+      bwCtx.beginPath();
+      historyData.forEach((d, i) => {
+        const x = padX + (plotW * i) / (maxTicks - 1);
+        const y = padY + plotH - (plotH * d.bandwidth_mbps) / maxVal;
+        if (i === 0) bwCtx.moveTo(x, y); else bwCtx.lineTo(x, y);
+      });
+      bwCtx.lineTo(currX, padY + plotH);
+      bwCtx.lineTo(padX, padY + plotH);
+      bwCtx.closePath();
+      bwCtx.fill();
+      bwCtx.restore();
+
+      // Draw Selected Bitrate Line (Stepped)
+      bwCtx.beginPath();
+      historyData.forEach((d, i) => {
+        const x = padX + (plotW * i) / (maxTicks - 1);
+        const rate = d.decision?.bitrate_mbps || d.bitrate_mbps || 0.8;
+        const y = padY + plotH - (plotH * rate) / maxVal;
+        if (i === 0) {
+          bwCtx.moveTo(x, y);
+        } else {
+          const prevX = padX + (plotW * (i - 1)) / (maxTicks - 1);
+          bwCtx.lineTo(x, prevY);
+          bwCtx.lineTo(x, y);
+        }
+        window.prevY = y;
+      });
+      bwCtx.strokeStyle = '#f59e0b';
+      bwCtx.lineWidth = 2.5;
+      bwCtx.stroke();
+
+      // Draw Current Tick Playhead Cursor
+      bwCtx.strokeStyle = '#fff';
+      bwCtx.lineWidth = 1.5;
+      bwCtx.setLineDash([4, 4]);
+      bwCtx.beginPath();
+      bwCtx.moveTo(currX, padY);
+      bwCtx.lineTo(currX, padY + plotH);
+      bwCtx.stroke();
+      bwCtx.setLineDash([]);
+
+      bwCtx.restore();
+    }
+
+    // Chart: Buffer Occupancy
+    function drawBufferChart() {
+      const dpr = window.devicePixelRatio || 1;
+      const w = bufCanvas.width / dpr;
+      const h = bufCanvas.height / dpr;
+      bufCtx.save();
+      bufCtx.scale(dpr, dpr);
+      bufCtx.clearRect(0, 0, w, h);
+
+      const maxTicks = historyData.length;
+      if (maxTicks <= 1) { bufCtx.restore(); return; }
+
+      const maxVal = 30.0; // Max buffer capacity is 30s
+      const padX = 35;
+      const padY = 20;
+      const plotW = w - padX - 10;
+      const plotH = h - padY - 20;
+
+      // Draw Danger Shading (< 3.0s)
+      const y3s = padY + plotH - (plotH * 3.0) / maxVal;
+      bufCtx.fillStyle = 'rgba(239, 68, 68, 0.08)';
+      bufCtx.fillRect(padX, y3s, plotW, padY + plotH - y3s);
+
+      // Draw Threshold line at 3s
+      bufCtx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+      bufCtx.lineWidth = 1;
+      bufCtx.setLineDash([3, 3]);
+      bufCtx.beginPath();
+      bufCtx.moveTo(padX, y3s);
+      bufCtx.lineTo(padX + plotW, y3s);
+      bufCtx.stroke();
+      bufCtx.setLineDash([]);
+
+      // Draw Threshold line at 8s
+      const y8s = padY + plotH - (plotH * 8.0) / maxVal;
+      bufCtx.strokeStyle = 'rgba(245, 158, 11, 0.3)';
+      bufCtx.setLineDash([3, 3]);
+      bufCtx.beginPath();
+      bufCtx.moveTo(padX, y8s);
+      bufCtx.lineTo(padX + plotW, y8s);
+      bufCtx.stroke();
+      bufCtx.setLineDash([]);
+
+      // Gridlines
+      bufCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      bufCtx.fillStyle = '#64748b';
+      bufCtx.font = '10px sans-serif';
+      bufCtx.textAlign = 'right';
+      [0, 10, 20, 30].forEach(val => {
+        const y = padY + plotH - (plotH * val) / maxVal;
+        bufCtx.beginPath();
+        bufCtx.moveTo(padX, y);
+        bufCtx.lineTo(padX + plotW, y);
+        bufCtx.stroke();
+        bufCtx.fillText(val + 's', padX - 6, y + 3);
+      });
+
+      // Buffer Occupancy Line
+      bufCtx.beginPath();
+      historyData.forEach((d, i) => {
+        const x = padX + (plotW * i) / (maxTicks - 1);
+        const y = padY + plotH - (plotH * Math.min(maxVal, d.buffer_s)) / maxVal;
+        if (i === 0) bufCtx.moveTo(x, y); else bufCtx.lineTo(x, y);
+      });
+      bufCtx.strokeStyle = '#10b981';
+      bufCtx.lineWidth = 2.5;
+      bufCtx.stroke();
+
+      // Current Tick Playhead Cursor
+      const currX = padX + (plotW * currentTick) / (maxTicks - 1);
+      bufCtx.strokeStyle = '#fff';
+      bufCtx.lineWidth = 1.5;
+      bufCtx.setLineDash([4, 4]);
+      bufCtx.beginPath();
+      bufCtx.moveTo(currX, padY);
+      bufCtx.lineTo(currX, padY + plotH);
+      bufCtx.stroke();
+      bufCtx.setLineDash([]);
+
+      bufCtx.restore();
+    }
+
+    // Canvas Simulated Video Graphic
+    function drawSimulatedVideo(quality, isStall) {
+      const dpr = window.devicePixelRatio || 1;
+      const w = videoCanvas.width / dpr;
+      const h = videoCanvas.height / dpr;
+      videoCtx.save();
+      videoCtx.scale(dpr, dpr);
+      videoCtx.clearRect(0, 0, w, h);
+
+      // Background gradient representing video frame content
+      const grad = videoCtx.createLinearGradient(0, 0, w, h);
+      if (isStall) {
+        grad.addColorStop(0, '#1e1b4b');
+        grad.addColorStop(1, '#0f172a');
+      } else {
+        const hue = (currentTick * 5) % 360;
+        grad.addColorStop(0, `hsl(${hue}, 40%, 15%)`);
+        grad.addColorStop(1, `hsl(${(hue + 40) % 360}, 50%, 8%)`);
+      }
+      videoCtx.fillStyle = grad;
+      videoCtx.fillRect(0, 0, w, h);
+
+      // Pixelated scanlines simulating video stream compression
+      const pixelSize = quality === '360p' ? 12 : (quality === '480p' ? 8 : (quality === '720p' ? 4 : 2));
+      videoCtx.fillStyle = 'rgba(255, 255, 255, 0.03)';
+      for (let y = 0; y < h; y += pixelSize * 2) {
+        videoCtx.fillRect(0, y, w, pixelSize);
+      }
+
+      // Animated test pattern wave
+      videoCtx.strokeStyle = isStall ? 'rgba(239, 68, 68, 0.3)' : 'rgba(56, 189, 248, 0.25)';
+      videoCtx.lineWidth = 2;
+      videoCtx.beginPath();
+      for (let x = 0; x < w; x += 5) {
+        const y = h / 2 + Math.sin((x + currentTick * 10) * 0.03) * (h / 4);
+        if (x === 0) videoCtx.moveTo(x, y); else videoCtx.lineTo(x, y);
+      }
+      videoCtx.stroke();
+
+      // Video watermark text
+      videoCtx.font = '12px monospace';
+      videoCtx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      videoCtx.fillText(`STREAM TIER: ${quality} &bull; FRAME #${currentTick * 60}`, 16, h - 16);
+
+      videoCtx.restore();
+    }
+
+    // Baselines fetching & table rendering
+    async function fetchBaselines() {
+      try {
+        const res = await fetch('/api/baselines');
+        baselineData = await res.json();
+        renderBaselineTable();
+      } catch (err) {
+        console.error('Failed to fetch baselines:', err);
+      }
+    }
+
+    function toggleEnv(envName, btn) {
+      currentEnv = envName;
+      document.getElementById('btnSynEnv').classList.remove('active');
+      document.getElementById('btnRealEnv').classList.remove('active');
+      if (btn) btn.classList.add('active');
+      renderBaselineTable();
+    }
+
+    function renderBaselineTable() {
+      const tbody = document.getElementById('baselineTableBody');
+      if (!baselineData || baselineData.length === 0) return;
+
+      const filtered = baselineData.filter(row => row.environment.startsWith(currentEnv));
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No baseline records found for ${currentEnv}</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(row => {
+        const isProposed = row.method === 'Proposed';
+        const qoeClass = row.qoe >= 0 ? 'c-green' : 'c-red';
+        const stallClass = row.rebuffer_seconds === 0 ? 'c-green' : (row.rebuffer_seconds < 1 ? 'c-amber' : 'c-red');
+        return `
+          <tr class="${isProposed ? 'highlight' : ''}">
+            <td><strong>${row.method}</strong> ${isProposed ? '<span class="badge" style="margin-left: 0.3rem;">Selected</span>' : ''}</td>
+            <td style="color: var(--text-muted);">${row.environment}</td>
+            <td class="${stallClass}">${row.rebuffer_seconds.toFixed(2)}s</td>
+            <td>${row.avg_bitrate_mbps.toFixed(2)} Mbps</td>
+            <td>${row.switches.toFixed(1)}</td>
+            <td class="${qoeClass}"><strong>${row.qoe.toFixed(2)}</strong></td>
+            <td>
+              <span style="font-size: 0.75rem; color: ${isProposed ? 'var(--primary)' : 'var(--text-muted)'};">
+                ${isProposed ? 'Optimal stability &amp; lowest stall' : (row.rebuffer_seconds > 100 ? 'Severe stall failure' : 'Benchmark rule')}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+
+</html>

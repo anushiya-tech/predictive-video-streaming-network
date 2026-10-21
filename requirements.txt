@@ -1,0 +1,15 @@
+# Optional ML accelerators are deferred until package compatibility is verified.
+numpy==2.4.2
+pandas==3.0.1
+scikit-learn==1.8.0
+fastapi==0.135.0
+uvicorn==0.41.0
+pydantic==2.12.5
+SQLAlchemy==2.0.48
+PyYAML==6.0.3
+matplotlib==3.10.8
+plotly==6.5.2
+pytest==9.0.2
+httpx==0.28.1
+joblib==1.5.3
+

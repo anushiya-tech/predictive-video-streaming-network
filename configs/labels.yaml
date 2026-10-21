@@ -1,0 +1,7 @@
+# Frozen before the first training run.
+seed: 42
+horizon_seconds: 5
+trend: {improving_pct: 0.15, degrading_pct: -0.15, severe_degrading_pct: -0.35, variance_guard: 0.50}
+buffer_risk: {medium_buffer_s: 8.0, high_buffer_s: 3.0, safe_buffer_s: 10.0}
+quality_safety_fraction: 0.85
+

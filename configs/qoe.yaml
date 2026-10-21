@@ -1,0 +1,7 @@
+# QoE weights.
+seed: 42
+quality_reward_weight: 1.0
+rebuffer_penalty: 4.3
+switch_penalty: 1.0
+startup_penalty: 1.0
+

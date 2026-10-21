@@ -1,0 +1,2 @@
+"""Streaming simulator package."""
+

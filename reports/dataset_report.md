@@ -1,0 +1,10 @@
+# Dataset report
+
+- observations: 101851
+- traces: 587
+- observations_per_trace: {'min': 17, 'max': 3963, 'mean': 173.51107325383305, 'median': 103.0}
+- throughput_mbps: {'count': 101851.0, 'mean': 1.2373342018294864, 'std': 0.9071672495732828, 'min': 0.0, '25%': 0.61226035503, '50%': 1.03693906094, '75%': 1.59674725275, 'max': 8.9515177305}
+- missing: {'trace_id': 0, 'timestamp_s': 0, 'source': 0, 'throughput_mbps': 0, 'latency_ms': 101851, 'loss_pct': 101851, 'jitter_ms': 101851, 'is_synthetic': 0, 'split': 0}
+- duplicates: 0
+- sources: {'real_world_traces': 587}
+- sampling_interval_s: 1.0

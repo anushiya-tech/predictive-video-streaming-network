@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+data/raw/
+data/processed/
+data/features/
+data/labels/
+models/
+logs/
+videos/*.mp4
+videos/*.m4s
+videos/*.mpd
+videos/*.m3u8
+

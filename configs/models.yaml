@@ -1,0 +1,7 @@
+# Model selection and calibration.
+seed: 42
+random_search_iterations: 20
+cv_folds: 5
+calibration_method: sigmoid
+selection_metric: macro_f1
+

@@ -1,0 +1,9 @@
+# Representation ladder ordered by quality.
+seed: 42
+segment_duration_seconds: 4.0
+representations:
+  - {resolution: 360p, bitrate_mbps: 0.8}
+  - {resolution: 480p, bitrate_mbps: 1.4}
+  - {resolution: 720p, bitrate_mbps: 2.8}
+  - {resolution: 1080p, bitrate_mbps: 5.0}
+
